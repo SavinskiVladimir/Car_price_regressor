@@ -2,7 +2,7 @@
 cities = {'Астрахань' : 'Astrakhan', 'Екатеринбург' : 'Yekaterinburg', 'Иркутск' : 'Irkutsk', 'Красноярск' : 'Krasnoyarsk',
           'Ростов-на-Дону' : 'Rostov-on-Don','Самара' : 'Samara', 'Санкт-Петербург' : 'Saint Petersburg',
           'Томск' : 'Tomsk', 'Челябинск' : 'Chelyabinsk', 'Чита' : 'Chita', 'Москва' : 'Moscow',
-      'Новосибирск' : 'Novosibirsk', 'Якутск' : 'Yakutsk', 'Барнуаул' : 'Barnaul', 'Нижний Новгород' : 'Nizhny Novgorod',
+      'Новосибирск' : 'Novosibirsk', 'Якутск' : 'Yakutsk', 'Барнаул' : 'Barnaul', 'Нижний Новгород' : 'Nizhny Novgorod',
           'Сургут' : 'Surgut', 'Уфа' : 'Ufa', 'Махачкала' : 'Makhachkala', 'Хабаровск' : 'Khabarovsk', 'Воронеж' : 'Voronezh',
           'Благовещенск' : 'Blagoveshchensk', 'Омск' : 'Omsk', 'Казань' : 'Kazan', 'Краснодар' : 'Krasnodar'}
 
