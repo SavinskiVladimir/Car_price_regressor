@@ -46,12 +46,13 @@ regressor.fit(f_train, r_train)
 
 # создание основного окна
 window = tk.Tk()
-window.configure(bg="#1E1B1B")
+window.configure(bg="#1B0909")
 window.title("Определитель стоимости автомобиля")
 
 # создание текстового поля для вывода
-output_text = scrolledtext.ScrolledText(window, width=100, height=15, state='disabled', bg="#1E1B1B", fg="white")
+output_text = scrolledtext.ScrolledText(window, width=100, height=15, state='disabled', bg="#1B0909", fg="white")
 output_text.pack(pady=5)
+output_text.tag_config('cyan', foreground="cyan")
 
 output_text.configure(state='normal')
 output_text.insert(tk.END, "Интеллектуальная система определения стоимости автомобиля готова к работе. Выберите команду:\nhelp - информация по порядку и принципу ввода данных\nenter - переход к вводу данных\nexit - завершение работы системы\n\n")
@@ -80,7 +81,8 @@ def get_price():
     # делаем прогноз
     order_prediction = regressor.predict(order_data)
     output_text.configure(state='normal')
-    output_text.insert(tk.END, "Оценочная стоимость автомобиля с введёнными параметрами: " + str(int(round(*order_prediction * 0.78, -2))) + '-' + str(int(round(*order_prediction * 0.95, -2))) + 'руб.\n\n')
+    output_text.insert(tk.END, "Оценочная стоимость автомобиля с введёнными параметрами: ")
+    output_text.insert(tk.END, str(int(round(*order_prediction * 0.78, -2))) + '-' + str(int(round(*order_prediction * 0.95, -2))) + ' руб.\n\n', "cyan")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
 
@@ -88,8 +90,9 @@ def get_price():
     number_entry.destroy()
 def parse_year(event):
     global ca
-    ca = 2024 - int(number_entry.get())
-    if ca < 0 or ca > 140:
+    try:
+        ca = 2024 - int(number_entry.get())
+    except ValueError:
         output_text.configure(state='normal')
         output_text.insert(tk.END, "Некорректный ввод, введите год производства снова\n")
         output_text.see(tk.END)
@@ -97,16 +100,26 @@ def parse_year(event):
         number_entry.delete(0, tk.END)
         number_entry.bind('<Return>', parse_year)
     else:
-        output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введённый год производства: " + str(2024 - ca) + "\n")
-        output_text.see(tk.END)
-        output_text.configure(state='disabled')
-        get_price()
+        if ca < 0 or ca > 140:
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Некорректный ввод, введите год производства снова\n")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            number_entry.delete(0, tk.END)
+            number_entry.bind('<Return>', parse_year)
+        else:
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Введённый год производства: ")
+            output_text.insert(tk.END, str(2024 - ca) + "\n", "cyan")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            get_price()
 
 def parse_horse_power_error(event):
     global chp
-    chp = int(number_entry.get())
-    if chp <= 0 or chp >= 2100:
+    try:
+        chp = int(number_entry.get())
+    except ValueError:
         output_text.configure(state='normal')
         output_text.insert(tk.END, "Некорректный ввод, введите количество лошадиных сил снова\n")
         output_text.see(tk.END)
@@ -114,21 +127,31 @@ def parse_horse_power_error(event):
         number_entry.delete(0, tk.END)
         number_entry.bind('<Return>', parse_horse_power_error)
     else:
-        number_entry.delete(0, tk.END)
-        output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введённое количество лошадиных сил: " + str(chp) + "\n")
-        output_text.see(tk.END)
-        output_text.configure(state='disabled')
-        output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введите год производства. ")
-        output_text.see(tk.END)
-        output_text.configure(state='disabled')
-        number_entry.bind('<Return>', parse_year)
+        if chp <= 0 or chp >= 2100:
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Некорректный ввод, введите количество лошадиных сил снова\n")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            number_entry.delete(0, tk.END)
+            number_entry.bind('<Return>', parse_horse_power_error)
+        else:
+            number_entry.delete(0, tk.END)
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Введённое количество лошадиных сил: ")
+            output_text.insert(tk.END, str(chp) + "\n", "cyan")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Введите год производства. ")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            number_entry.bind('<Return>', parse_year)
 
 def parse_horse_power(event):
     global chp
-    chp = int(number_entry.get())
-    if chp <= 0 or chp >= 2100:
+    try:
+        chp = int(number_entry.get())
+    except ValueError:
         output_text.configure(state='normal')
         output_text.insert(tk.END, "Некорректный ввод, введите количество лошадиных сил снова\n")
         output_text.see(tk.END)
@@ -136,21 +159,31 @@ def parse_horse_power(event):
         number_entry.delete(0, tk.END)
         number_entry.bind('<Return>', parse_horse_power_error)
     else:
-        number_entry.delete(0, tk.END)
-        output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введённое количество лошадиных сил: " + str(chp) + "\n")
-        output_text.see(tk.END)
-        output_text.configure(state='disabled')
-        output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введите год производства. ")
-        output_text.see(tk.END)
-        output_text.configure(state='disabled')
-        number_entry.bind('<Return>', parse_year)
+        if chp <= 0 or chp >= 2100:
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Некорректный ввод, введите количество лошадиных сил снова\n")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            number_entry.delete(0, tk.END)
+            number_entry.bind('<Return>', parse_horse_power_error)
+        else:
+            number_entry.delete(0, tk.END)
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Введённое количество лошадиных сил: ")
+            output_text.insert(tk.END, str(chp) + "\n", "cyan")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Введите год производства. ")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            number_entry.bind('<Return>', parse_year)
 
 def parse_engine_capacity_error(event):
     global cec
-    cec = float(number_entry.get())
-    if cec < 0 or cec > 8:
+    try:
+        cec = float(number_entry.get())
+    except ValueError:
         output_text.configure(state='normal')
         output_text.insert(tk.END, "Некорректный ввод, введите объём двигателя снова\n")
         output_text.see(tk.END)
@@ -158,16 +191,25 @@ def parse_engine_capacity_error(event):
         number_entry.delete(0, tk.END)
         number_entry.bind('<Return>', parse_engine_capacity_error)
     else:
-        number_entry.delete(0, tk.END)
-        output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введённый объём двигателя: " + str(cec) + "л\n")
-        output_text.see(tk.END)
-        output_text.configure(state='disabled')
-        output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введите количество лошадиных сил. ")
-        output_text.see(tk.END)
-        output_text.configure(state='disabled')
-        number_entry.bind('<Return>', parse_horse_power)
+        if cec < 0 or cec > 8:
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Некорректный ввод, введите объём двигателя снова\n")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            number_entry.delete(0, tk.END)
+            number_entry.bind('<Return>', parse_engine_capacity_error)
+        else:
+            number_entry.delete(0, tk.END)
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Введённый объём двигателя: ")
+            output_text.insert(tk.END, str(cec) + "  л\n", "cyan")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Введите количество лошадиных сил. ")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            number_entry.bind('<Return>', parse_horse_power)
 def parse_engine_capacity(event):
     global cec
     cec = float(number_entry.get())
@@ -181,7 +223,8 @@ def parse_engine_capacity(event):
     else:
         number_entry.delete(0, tk.END)
         output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введённый объём двигаетля: " + str(cec) + "л\n")
+        output_text.insert(tk.END, "Введённый объём двигаетля: ")
+        output_text.insert(tk.END, str(cec) + " л\n", "cyan")
         output_text.see(tk.END)
         output_text.configure(state='disabled')
         output_text.configure(state='normal')
@@ -192,8 +235,9 @@ def parse_engine_capacity(event):
 
 def parse_milage_error(event):
     global cmi
-    cmi = int(number_entry.get())
-    if cmi < 0:
+    try:
+        cmi = int(number_entry.get())
+    except ValueError:
         output_text.configure(state='normal')
         output_text.insert(tk.END, "Некорректный ввод, введите пробег снова\n")
         output_text.see(tk.END)
@@ -201,23 +245,33 @@ def parse_milage_error(event):
         number_entry.delete(0, tk.END)
         number_entry.bind('<Return>', parse_milage_error)
     else:
-        number_entry.delete(0, tk.END)
+        if cmi < 0:
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Некорректный ввод, введите пробег снова\n")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            number_entry.delete(0, tk.END)
+            number_entry.bind('<Return>', parse_milage_error)
+        else:
+            number_entry.delete(0, tk.END)
 
-        output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введённый пробег: " + str(cmi) + "км\n")
-        output_text.see(tk.END)
-        output_text.configure(state='disabled')
-        output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введите объём двигателя. ")
-        output_text.see(tk.END)
-        output_text.configure(state='disabled')
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Введённый пробег: ")
+            output_text.insert(tk.END, str(cmi) + " км\n", "cyan")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Введите объём двигателя. ")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
 
-        number_entry.bind('<Return>', parse_engine_capacity)
+            number_entry.bind('<Return>', parse_engine_capacity)
 
 def parse_milage(event):
     global cmi
-    cmi = int(number_entry.get())
-    if cmi < 0:
+    try:
+        cmi = int(number_entry.get())
+    except ValueError:
         output_text.configure(state='normal')
         output_text.insert(tk.END, "Некорректный ввод, введите пробег снова\n")
         output_text.see(tk.END)
@@ -225,23 +279,33 @@ def parse_milage(event):
         number_entry.delete(0, tk.END)
         number_entry.bind('<Return>', parse_milage_error)
     else:
-        number_entry.delete(0, tk.END)
-        output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введённый пробег: " + str(cmi) + "км\n")
-        output_text.see(tk.END)
-        output_text.configure(state='disabled')
-        output_text.configure(state='normal')
-        output_text.insert(tk.END, "Введите объём двигателя. ")
-        output_text.see(tk.END)
-        output_text.configure(state='disabled')
+        if cmi < 0:
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Некорректный ввод, введите пробег снова\n")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            number_entry.delete(0, tk.END)
+            number_entry.bind('<Return>', parse_milage_error)
+        else:
+            number_entry.delete(0, tk.END)
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Введённый пробег: ")
+            output_text.insert(tk.END, str(cmi) + " км\n", "cyan")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
+            output_text.configure(state='normal')
+            output_text.insert(tk.END, "Введите объём двигателя. ")
+            output_text.see(tk.END)
+            output_text.configure(state='disabled')
 
-        number_entry.bind('<Return>', parse_engine_capacity)
+            number_entry.bind('<Return>', parse_engine_capacity)
 
 def parse_drive(event):
     global cd
     s = combobox_drive.get()
     output_text.configure(state='normal')
-    output_text.insert(tk.END, "Выбранный тип привода: " + s + "\n")
+    output_text.insert(tk.END, "Выбранный тип привода: ")
+    output_text.insert(tk.END, s + "\n", "cyan")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
     cd = names.drive_type[s]
@@ -253,7 +317,7 @@ def parse_drive(event):
     output_text.insert(tk.END, "Введите пробег. ")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
-    number_entry = tk.Entry(window, bg="#1E1B1B", fg="white")
+    number_entry = tk.Entry(window, bg="#1B0909", fg="white")
     number_entry.pack(pady=5)
     number_entry.bind('<Return>', parse_milage)
 
@@ -261,7 +325,8 @@ def parse_transmission(event):
     global ct
     s = combobox_transmission.get()
     output_text.configure(state='normal')
-    output_text.insert(tk.END, "Выбранный тип кпп: " + s + "\n")
+    output_text.insert(tk.END, "Выбранный тип кпп: ")
+    output_text.insert(tk.END, s + "\n", "cyan")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
     ct = names.transmission_type[s]
@@ -269,7 +334,7 @@ def parse_transmission(event):
     label_transmission.destroy()
 
     global label_drive, combobox_drive
-    label_drive = tk.Label(window, text="Вид привода", bg="#1E1B1B", fg="white")
+    label_drive = tk.Label(window, text="Вид привода", bg="#1B0909", fg="white")
     label_drive.pack(pady=5)
     output_text.configure(state='normal')
     output_text.insert(tk.END, "Выберите вид привода. ")
@@ -283,7 +348,8 @@ def parse_fuel(event):
     global cf
     s = combobox_fuel.get()
     output_text.configure(state='normal')
-    output_text.insert(tk.END, "Выбранный тип двигателя: " + s + "\n")
+    output_text.insert(tk.END, "Выбранный тип двигателя: ")
+    output_text.insert(tk.END, s + "\n", "cyan")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
     cf = names.engine_type[s]
@@ -291,7 +357,7 @@ def parse_fuel(event):
     label_fuel.destroy()
 
     global label_transmission, combobox_transmission
-    label_transmission = tk.Label(window, text="Вид кпп", bg="#1E1B1B", fg="white")
+    label_transmission = tk.Label(window, text="Вид кпп", bg="#1B0909", fg="white")
     label_transmission.pack(pady=5)
     output_text.configure(state='normal')
     output_text.insert(tk.END, "Выберите вид кпп. ")
@@ -304,7 +370,8 @@ def parse_city(event):
     global cci
     s = combobox_cities.get()
     output_text.configure(state='normal')
-    output_text.insert(tk.END, "Выбранный город: " + s + "\n")
+    output_text.insert(tk.END, "Выбранный город: ")
+    output_text.insert(tk.END, s + "\n", "cyan")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
     cci = names.cities[s]
@@ -312,7 +379,7 @@ def parse_city(event):
     label_cities.destroy()
 
     global label_fuel, combobox_fuel
-    label_fuel = tk.Label(window, text="Тип двигателя", bg="#1E1B1B", fg="white")
+    label_fuel = tk.Label(window, text="Тип двигателя", bg="#1B0909", fg="white")
     label_fuel.pack(pady=5)
     output_text.configure(state='normal')
     output_text.insert(tk.END, "Выберите тип двигателя. ")
@@ -326,14 +393,15 @@ def parse_model(event):
     global cm
     cm = combobox_models.get()
     output_text.configure(state='normal')
-    output_text.insert(tk.END, "Выбранная модель: " + cm + "\n")
+    output_text.insert(tk.END, "Выбранная модель: ")
+    output_text.insert(tk.END, cm + "\n", "cyan")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
     combobox_models.destroy()
     label_models.destroy()
 
     global label_cities, combobox_cities
-    label_cities = tk.Label(window, text="Город продажи", bg="#1E1B1B", fg="white")
+    label_cities = tk.Label(window, text="Город продажи", bg="#1B0909", fg="white")
     label_cities.pack(pady=5)
     output_text.configure(state='normal')
     output_text.insert(tk.END, "Выберите город продажи. ")
@@ -347,20 +415,25 @@ def parse_brand(event):
     global cb
     cb = combobox_brands.get()
     output_text.configure(state='normal')
-    output_text.insert(tk.END, "Выбранная марка: " + cb + "\n")
+    output_text.insert(tk.END, "Выбранная марка: ")
+    output_text.insert(tk.END, cb + "\n", "cyan")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
     combobox_brands.destroy()
     label_brands.destroy()
 
     global label_models, combobox_models
-    label_models = tk.Label(window, text="Модель автомобиля", bg="#1E1B1B", fg="white")
+    label_models = tk.Label(window, text="Модель автомобиля", bg="#1B0909", fg="white")
     label_models.pack(pady=5)
     output_text.configure(state='normal')
     output_text.insert(tk.END, "Выберите модель автомобиля. ")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
-    combobox_models = ttk.Combobox(window, width=40, height=20, values=sorted(names.models_by_brand[cb]))
+    print(type(names.models_by_brand[cb]))
+    if not isinstance(names.models_by_brand[cb], str):
+        combobox_models = ttk.Combobox(window, width=40, height=20, values=sorted(names.models_by_brand[cb]))
+    else:
+        combobox_models = ttk.Combobox(window, width=40, height=20, values=[names.models_by_brand[cb]])
     combobox_models.pack(pady=5)
     combobox_models.bind("<<ComboboxSelected>>", parse_model)
 
@@ -383,7 +456,7 @@ def parse_command(event):
         # сбор данных пользователя
 
         global label_brands, combobox_brands
-        label_brands = tk.Label(window, text="Марка автомобиля", bg="#1E1B1B", fg="white")
+        label_brands = tk.Label(window, text="Марка автомобиля", bg="#1B0909", fg="white")
         label_brands.pack(pady=5)
         output_text.configure(state='normal')
         output_text.insert(tk.END, "Выберите марку автомобиля. ")
@@ -394,7 +467,7 @@ def parse_command(event):
         combobox_brands.bind("<<ComboboxSelected>>", parse_brand)
 
 
-label = tk.Label(window, text="Команда", bg="#1E1B1B", fg="white")
+label = tk.Label(window, text="Команда", bg="#1B0909", fg="white")
 label.pack(pady=5)
 
 style = ttk.Style()
