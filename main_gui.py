@@ -46,14 +46,15 @@ regressor.fit(f_train, r_train)
 
 # создание основного окна
 window = tk.Tk()
+window.configure(bg="#1E1B1B")
 window.title("Определитель стоимости автомобиля")
 
 # создание текстового поля для вывода
-output_text = scrolledtext.ScrolledText(window, width=80, height=15, state='disabled')
+output_text = scrolledtext.ScrolledText(window, width=100, height=15, state='disabled', bg="#1E1B1B", fg="white")
 output_text.pack(pady=5)
 
 output_text.configure(state='normal')
-output_text.insert(tk.END, "Интеллектуальная система определения \nстоимости автомобиля готова к работе\nВыберите команду:\nhelp - информация по порядку и принципу ввода данных\nenter - переход к вводу данных\nexit - завершение работы системы\n")
+output_text.insert(tk.END, "Интеллектуальная система определения стоимости автомобиля готова к работе. Выберите команду:\nhelp - информация по порядку и принципу ввода данных\nenter - переход к вводу данных\nexit - завершение работы системы\n\n")
 output_text.see(tk.END)
 output_text.configure(state='disabled')
 
@@ -79,7 +80,7 @@ def get_price():
     # делаем прогноз
     order_prediction = regressor.predict(order_data)
     output_text.configure(state='normal')
-    output_text.insert(tk.END, "Оценочная стоимость автомобиля с введёнными параметрами: " + str(int(round(*order_prediction * 0.78, -2))) + '-' + str(int(round(*order_prediction * 0.95, -2))) + 'руб.\n')
+    output_text.insert(tk.END, "Оценочная стоимость автомобиля с введёнными параметрами: " + str(int(round(*order_prediction * 0.78, -2))) + '-' + str(int(round(*order_prediction * 0.95, -2))) + 'руб.\n\n')
     output_text.see(tk.END)
     output_text.configure(state='disabled')
 
@@ -252,7 +253,7 @@ def parse_drive(event):
     output_text.insert(tk.END, "Введите пробег. ")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
-    number_entry = tk.Entry(window)
+    number_entry = tk.Entry(window, bg="#1E1B1B", fg="white")
     number_entry.pack(pady=5)
     number_entry.bind('<Return>', parse_milage)
 
@@ -268,7 +269,7 @@ def parse_transmission(event):
     label_transmission.destroy()
 
     global label_drive, combobox_drive
-    label_drive = tk.Label(window, text="Вид привода")
+    label_drive = tk.Label(window, text="Вид привода", bg="#1E1B1B", fg="white")
     label_drive.pack(pady=5)
     output_text.configure(state='normal')
     output_text.insert(tk.END, "Выберите вид привода. ")
@@ -290,7 +291,7 @@ def parse_fuel(event):
     label_fuel.destroy()
 
     global label_transmission, combobox_transmission
-    label_transmission = tk.Label(window, text="Вид кпп")
+    label_transmission = tk.Label(window, text="Вид кпп", bg="#1E1B1B", fg="white")
     label_transmission.pack(pady=5)
     output_text.configure(state='normal')
     output_text.insert(tk.END, "Выберите вид кпп. ")
@@ -311,7 +312,7 @@ def parse_city(event):
     label_cities.destroy()
 
     global label_fuel, combobox_fuel
-    label_fuel = tk.Label(window, text="Тип двигателя")
+    label_fuel = tk.Label(window, text="Тип двигателя", bg="#1E1B1B", fg="white")
     label_fuel.pack(pady=5)
     output_text.configure(state='normal')
     output_text.insert(tk.END, "Выберите тип двигателя. ")
@@ -332,7 +333,7 @@ def parse_model(event):
     label_models.destroy()
 
     global label_cities, combobox_cities
-    label_cities = tk.Label(window, text="Город продажи")
+    label_cities = tk.Label(window, text="Город продажи", bg="#1E1B1B", fg="white")
     label_cities.pack(pady=5)
     output_text.configure(state='normal')
     output_text.insert(tk.END, "Выберите город продажи. ")
@@ -353,7 +354,7 @@ def parse_brand(event):
     label_brands.destroy()
 
     global label_models, combobox_models
-    label_models = tk.Label(window, text="Модель автомобиля")
+    label_models = tk.Label(window, text="Модель автомобиля", bg="#1E1B1B", fg="white")
     label_models.pack(pady=5)
     output_text.configure(state='normal')
     output_text.insert(tk.END, "Выберите модель автомобиля. ")
@@ -367,7 +368,7 @@ def parse_command(event):
     command = combobox.get() # получение команды из выпадающего меню
     if command == "help":
         output_text.configure(state='normal')
-        output_text.insert(tk.END, "Для оценки стоимости автомобиля используются следующие параметры:\n1) Производитель: предлагается выбрать один вариант из предложенного списка, например, Volkswagen\n2) Модель: предлагается выбрать один вариант из предложенного списка, например, Polo\n3) Город продажи: предлагается выбрать один вариант из предложенного списка, например, Москва\n4) Вид топлива: предлагается выбрать один вариант из предложенного списка, например, бензин\n5) Вид трансмиссии: предлагается выбрать один вариант из предложенного списка, например, автоматическая\n6) Вид привода: предлагается выбрать один вариант из предложенного списка, например, передний\n7) Пробег: необходимо ввести целое число километров, например, 75000\n8) Рабочий объём двигателя: необходимо ввести дробное число литров, разделяя разряды точкой, например, 1.5\n9) Мощность двигателя: необходимо ввести целое число лошадиных сил, например, 110\n10) Год производства автомобиля: необоходимо ввести целоче число, например, 2018\n")
+        output_text.insert(tk.END, "Для оценки стоимости автомобиля используются следующие параметры:\n1) Производитель: предлагается выбрать один вариант из предложенного списка, например, Volkswagen\n2) Модель: предлагается выбрать один вариант из предложенного списка, например, Polo\n3) Город продажи: предлагается выбрать один вариант из предложенного списка, например, Москва\n4) Вид топлива: предлагается выбрать один вариант из предложенного списка, например, бензин\n5) Вид трансмиссии: предлагается выбрать один вариант из предложенного списка, например, автоматическая\n6) Вид привода: предлагается выбрать один вариант из предложенного списка, например, передний\n7) Пробег: необходимо ввести целое число километров, например, 75000\n8) Рабочий объём двигателя: необходимо ввести дробное число литров, разделяя разряды точкой, например, 1.5\n9) Мощность двигателя: необходимо ввести целое число лошадиных сил, например, 110\n10) Год производства автомобиля: необоходимо ввести целоче число, например, 2018\n\n")
         output_text.see(tk.END)
         output_text.configure(state='disabled')
         output_text.pack(pady=5)
@@ -382,7 +383,7 @@ def parse_command(event):
         # сбор данных пользователя
 
         global label_brands, combobox_brands
-        label_brands = tk.Label(window, text="Марка автомобиля")
+        label_brands = tk.Label(window, text="Марка автомобиля", bg="#1E1B1B", fg="white")
         label_brands.pack(pady=5)
         output_text.configure(state='normal')
         output_text.insert(tk.END, "Выберите марку автомобиля. ")
@@ -393,8 +394,11 @@ def parse_command(event):
         combobox_brands.bind("<<ComboboxSelected>>", parse_brand)
 
 
-label = tk.Label(window, text="Команда")
+label = tk.Label(window, text="Команда", bg="#1E1B1B", fg="white")
 label.pack(pady=5)
+
+style = ttk.Style()
+style.configure("TCombobox", fieldbackground="orange", foreground="black")
 
 # создание выпадающего меню для выбора команды
 combobox = ttk.Combobox(window, width=40, height=20, values=['help', 'enter', 'exit'])
