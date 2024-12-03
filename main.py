@@ -97,7 +97,10 @@ while True:
                   print()
 
                   flag = False
-                  out(names.models_by_brand[cb])
+                  if isinstance(names.models_by_brand[cb], str):
+                        print(names.models_by_brand[cb])
+                  else:
+                        out(names.models_by_brand[cb])
                   while (flag != True):
                         print('выберите модель автомобиля: ', end='')
                         cm = input()
