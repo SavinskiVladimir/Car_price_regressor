@@ -7,18 +7,6 @@ import tkinter as tk
 from tkinter import scrolledtext
 from tkinter import ttk
 
-#функция вывода большого списка на экран
-def out(a):
-    count = 0
-    for i in sorted(a):
-        if count != 7:
-            print(i, end=', ')
-            count += 1
-        else:
-            print()
-            count = 0
-            print(i, end=', ')
-    print()
 
 # получаем данные для обучения регрессора из файла car_data.csv
 data = pd.read_csv("car_data.csv")
@@ -52,16 +40,16 @@ factors = scaler.fit_transform(factors)
 # разделяем на обучающую и тестовую выборки
 f_train, f_test, r_train, r_test = train_test_split(factors, response, test_size=0.19999998, random_state=0)
 
-# # регрессия случайным лесом
-# regressor = RandomForestRegressor()
-# regressor.fit(f_train, r_train)
+# регрессия случайным лесом
+regressor = RandomForestRegressor()
+regressor.fit(f_train, r_train)
 
 # создание основного окна
 window = tk.Tk()
 window.title("Определитель стоимости автомобиля")
 
 # создание текстового поля для вывода
-output_text = scrolledtext.ScrolledText(window, width=80, height=30, state='disabled')
+output_text = scrolledtext.ScrolledText(window, width=80, height=15, state='disabled')
 output_text.pack(pady=5)
 
 output_text.configure(state='normal')
@@ -69,11 +57,172 @@ output_text.insert(tk.END, "Интеллектуальная система оп
 output_text.see(tk.END)
 output_text.configure(state='disabled')
 
+def get_price():
+    global cb, cm, cci, cf, ct, cd, cmi, cec, chp, ca
+    order_dict = {'car_brand': cb, 'car_model': cm, 'car_city': cci, 'car_fuel': cf,
+                               'car_transmission': ct, 'car_drive': cd, 'car_mileage': cmi,
+                               'car_engine_capacity': cec, 'car_engine_hp': chp, 'car_age': ca}
+    # переводим данные в dataframe
+    order_data = pd.DataFrame(order_dict, index=[0])
+
+    # приводим строковые данные к численному формату (пользовательские)
+    order_data['car_brand'] = brand_encoder.transform(order_data['car_brand'])
+    order_data['car_model'] = model_encoder.transform(order_data['car_model'])
+    order_data['car_city'] = city_encoder.transform(order_data['car_city'])
+    order_data['car_fuel'] = fuel_encoder.transform(order_data['car_fuel'])
+    order_data['car_transmission'] = transmission_encoder.transform(order_data['car_transmission'])
+    order_data['car_drive'] = drive_encoder.transform(order_data['car_drive'])
+
+    # проводим нормализацию данных (пользовательских)
+    order_data = scaler.transform(order_data)
+
+    # делаем прогноз
+    order_prediction = regressor.predict(order_data)
+    output_text.configure(state='normal')
+    output_text.insert(tk.END, "Оценочная стоимость автомобиля с введёнными параметрами: " + str(int(round(*order_prediction * 0.78, -2))) + '-' + str(int(round(*order_prediction * 0.95, -2))) + 'руб.\n')
+    output_text.see(tk.END)
+    output_text.configure(state='disabled')
+
+    number_entry.delete(0, tk.END)
+    number_entry.destroy()
+def parse_year(event):
+    global ca
+    ca = 2024 - int(number_entry.get())
+    if ca < 0 or ca > 140:
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Некорректный ввод, введите год производства снова\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+        number_entry.delete(0, tk.END)
+        number_entry.bind('<Return>', parse_year)
+    else:
+        get_price()
+
+def parse_horse_power_error(event):
+    global chp
+    chp = int(number_entry.get())
+    if chp <= 0 or chp >= 2100:
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Некорректный ввод, введите количество лошадиных сил снова\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+        number_entry.delete(0, tk.END)
+        number_entry.bind('<Return>', parse_horse_power_error)
+    else:
+        number_entry.delete(0, tk.END)
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Введите год производства\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+        number_entry.bind('<Return>', parse_year)
+
+def parse_horse_power(event):
+    global chp
+    chp = int(number_entry.get())
+    if chp <= 0 or chp >= 2100:
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Некорректный ввод, введите количество лошадиных сил снова\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+        number_entry.delete(0, tk.END)
+        number_entry.bind('<Return>', parse_horse_power_error)
+    else:
+        number_entry.delete(0, tk.END)
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Введите год производства\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+        number_entry.bind('<Return>', parse_year)
+
+def parse_engine_capacity_error(event):
+    global cec
+    cec = float(number_entry.get())
+    if cec < 0 or cec > 8:
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Некорректный ввод, введите объём двигателя снова\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+        number_entry.delete(0, tk.END)
+        number_entry.bind('<Return>', parse_engine_capacity_error)
+    else:
+        number_entry.delete(0, tk.END)
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Введите количество лошадиных сил\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+        number_entry.bind('<Return>', parse_horse_power)
+def parse_engine_capacity(event):
+    global cec
+    cec = float(number_entry.get())
+    if cec < 0 or cec > 8:
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Некорректный ввод, введите объём двигателя снова\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+        number_entry.delete(0, tk.END)
+        number_entry.bind('<Return>', parse_engine_capacity_error)
+    else:
+        number_entry.delete(0, tk.END)
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Введите количество лошадиных сил\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+        number_entry.bind('<Return>', parse_horse_power)
+
+def parse_milage_error(event):
+    global cmi
+    cmi = int(number_entry.get())
+    if cmi < 0:
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Некорректный ввод, введите пробег снова\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+        number_entry.delete(0, tk.END)
+        number_entry.bind('<Return>', parse_milage_error)
+    else:
+        number_entry.delete(0, tk.END)
+
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Введите объём двигателя\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+
+        number_entry.bind('<Return>', parse_engine_capacity)
+
+def parse_milage(event):
+    global cmi
+    cmi = int(number_entry.get())
+    if cmi < 0:
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Некорректный ввод, введите пробег снова\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+        number_entry.delete(0, tk.END)
+        number_entry.bind('<Return>', parse_milage_error)
+    else:
+        number_entry.delete(0, tk.END)
+
+        output_text.configure(state='normal')
+        output_text.insert(tk.END, "Введите объём двигателя\n")
+        output_text.see(tk.END)
+        output_text.configure(state='disabled')
+
+        number_entry.bind('<Return>', parse_engine_capacity)
+
 def parse_drive(event):
     global cd
     cd = names.drive_type[combobox_drive.get()]
     combobox_drive.destroy()
     label_drive.destroy()
+
+    global number_entry
+    output_text.configure(state='normal')
+    output_text.insert(tk.END, "Введите пробег\n")
+    output_text.see(tk.END)
+    output_text.configure(state='disabled')
+    number_entry = tk.Entry(window)
+    number_entry.pack(pady=5)
+    number_entry.bind('<Return>', parse_milage)
 
 def parse_transmission(event):
     global ct
@@ -88,9 +237,9 @@ def parse_transmission(event):
     output_text.insert(tk.END, "Выберите вид привода\n")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
-    combobox_drive = ttk.Combobox(window, width=40, height=20, values=list(names.drive_type.keys()))
+    combobox_drive = ttk.Combobox(window, width=40, height=20, values=sorted(list(names.drive_type.keys())))
     combobox_drive.pack(pady=5)
-    combobox_drive.bind("<<ComboboxSelected>>", parse_transmission)
+    combobox_drive.bind("<<ComboboxSelected>>", parse_drive)
 
 def parse_fuel(event):
     global cf
@@ -105,7 +254,7 @@ def parse_fuel(event):
     output_text.insert(tk.END, "Выберите вид кпп\n")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
-    combobox_transmission = ttk.Combobox(window, width=40, height=20, values=list(names.transmission_type.keys()))
+    combobox_transmission = ttk.Combobox(window, width=40, height=20, values=sorted(list(names.transmission_type.keys())))
     combobox_transmission.pack(pady=5)
     combobox_transmission.bind("<<ComboboxSelected>>", parse_transmission)
 def parse_city(event):
@@ -121,7 +270,7 @@ def parse_city(event):
     output_text.insert(tk.END, "Выберите тип двигателя\n")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
-    combobox_fuel = ttk.Combobox(window, width=40, height=20, values=list(names.engine_type.keys()))
+    combobox_fuel = ttk.Combobox(window, width=40, height=20, values=sorted(list(names.engine_type.keys())))
     combobox_fuel.pack(pady=5)
     combobox_fuel.bind("<<ComboboxSelected>>", parse_fuel)
 
@@ -138,7 +287,7 @@ def parse_model(event):
     output_text.insert(tk.END, "Выберите город продажи\n")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
-    combobox_cities = ttk.Combobox(window, width=40, height=20, values=list(names.cities.keys()))
+    combobox_cities = ttk.Combobox(window, width=40, height=20, values=sorted(list(names.cities.keys())))
     combobox_cities.pack(pady=5)
     combobox_cities.bind("<<ComboboxSelected>>", parse_city)
 
@@ -155,7 +304,7 @@ def parse_brand(event):
     output_text.insert(tk.END, "Выберите модель автомобиля\n")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
-    combobox_models = ttk.Combobox(window, width=40, height=20, values=names.models_by_brand[cb])
+    combobox_models = ttk.Combobox(window, width=40, height=20, values=sorted(names.models_by_brand[cb]))
     combobox_models.pack(pady=5)
     combobox_models.bind("<<ComboboxSelected>>", parse_model)
 
@@ -184,65 +333,9 @@ def parse_command(event):
         output_text.insert(tk.END, "Выберите марку автомобиля\n")
         output_text.see(tk.END)
         output_text.configure(state='disabled')
-        combobox_brands = ttk.Combobox(window, width=40, height=20, values=names.brands)
+        combobox_brands = ttk.Combobox(window, width=40, height=20, values=sorted(names.brands))
         combobox_brands.pack(pady=5)
         combobox_brands.bind("<<ComboboxSelected>>", parse_brand)
-
-
-            # flag = False
-            # while (flag != True):
-            #     print('введите пробег: ', end='')
-            #     cmi = int(input())
-            #     if (cmi >= 0):
-            #         flag = True
-            #     else:
-            #         print('данные введены некорректно, \nповторите ввод')
-            # print()
-            #
-            # flag = False
-            # while (flag != True):
-            #     print('введите объем двигателя: ', end='')
-            #     cec = float(input())
-            #     if cec > 0 and cec < 8:
-            #         flag = True
-            #     else:
-            #         print('данные введены некорректно, \nповторите ввод')
-            # print()
-            #
-            # flag = False
-            # while (flag != True):
-            #     print('введите количество лошадиных сил: ', end='')
-            #     chp = int(input())
-            #     if chp > 0 and chp < 2100:
-            #         flag = True
-            #     else:
-            #         print('данные введены некорректно, \nповторите ввод')
-            # print()
-            #
-            # flag = False
-            # while (flag != True):
-            #     print('введите год производства автомобиля: ', end='')
-            #     ca = 2024 - int(input())
-            #     if ca >= 0 and ca < 140:
-            #         flag = True
-            #     else:
-            #         print('данные введены некорректно, \nповторите ввод')
-            # print()
-            #
-            # # словарь для данных пользователя
-            # order_dict = {'car_brand': cb, 'car_model': cm, 'car_city': cci, 'car_fuel': cf,
-            #               'car_transmission': ct, 'car_drive': cd, 'car_mileage': cmi,
-            #               'car_engine_capacity': cec, 'car_engine_hp': chp, 'car_age': ca}
-            #
-            # # проверка введённых данных
-            # print('Ваши данные:')
-            # for i in order_dict.values():
-            #     print(i, sep=', ', end=' ')
-            # print()
-            # print('Данные коректны: да/нет?')
-            # key = input()
-            # if (key == 'да'):
-            #     flag_glob = False
 
 
 label = tk.Label(window, text="Команда")
@@ -254,176 +347,3 @@ combobox.pack(pady=5)
 combobox.bind("<<ComboboxSelected>>", parse_command)
 
 window.mainloop()
-
-# запуск системы
-# while True:
-#     flag_start = True
-#     while flag_start:
-#         print("Команда: ", end='')
-#         command = input()
-#         if command != "help" and command != "enter" and command != "exit":
-#             print("Ввод некорректен, повторите его")
-#         else:
-#             flag_start = False
-#     if command == "help":
-#         print("Для оценки стоимости автомобиля используются следующие параметры:\n"
-#               "1) Производитель: предлагается выбрать один вариант из предложенного списка, например, Volkswagen\n"
-#               "2) Модель: предлагается выбрать один вариант из предложенного списка, например, Polo\n"
-#               "3) Город продажи: предлагается выбрать один вариант из предложенного списка, например, Москва\n"
-#               "4) Вид топлива: предлагается выбрать один вариант из предложенного списка, например, бензин\n"
-#               "5) Вид трансмиссии: предлагается выбрать один вариант из предложенного списка, например, автоматическая\n"
-#               "6) Вид привода: предлагается выбрать один вариант из предложенного списка, например, передний\n"
-#               "7) Пробег: необходимо ввести целое число километров, например, 75000\n"
-#               "8) Рабочий объём двигателя: необходимо ввести дробное число литров, разделяя разряды точкой, например, 1.5\n"
-#               "9) Мощность двигателя: необходимо ввести целое число лошадиных сил, например, 110\n"
-#               "10) Год производства автомобиля: необоходимо ввести целоче число, например, 2018\n")
-#     elif command == "enter":
-#         flag_glob = True
-#         while flag_glob:
-#             # сбор данных пользователя
-#             flag = False
-#             out(names.brands)
-#             while (flag != True):
-#                 print('выберите марку автомобиля: ', end='')
-#                 cb = input()
-#                 if cb in names.brands:
-#                     flag = True
-#                 else:
-#                     print('данные введены некорректно, \nповторите ввод')
-#             print()
-#
-#             flag = False
-#             out(names.models_by_brand[cb])
-#             while (flag != True):
-#                 print('выберите модель автомобиля: ', end='')
-#                 cm = input()
-#                 if cm in names.models_by_brand[cb]:
-#                     flag = True
-#                 else:
-#                     print('данные введены некорректно, \nповторите ввод')
-#             print()
-#
-#             flag = False
-#             out(names.cities.keys())
-#             while (flag != True):
-#                 print('выберите город продажи: ', end='')
-#                 s = input()
-#                 if s in names.cities.keys():
-#                     cci = names.cities[s]
-#                     flag = True
-#                 else:
-#                     print('данные введены некорректно, \nповторите ввод')
-#             print()
-#
-#             flag = False
-#             out(names.engine_type.keys())
-#             while (flag != True):
-#                 print('выберите вид топлива: ', end='')
-#                 s = input()
-#                 if s in names.engine_type.keys():
-#                     cf = names.engine_type[s]
-#                     flag = True
-#                 else:
-#                     print('данные введены некорректно, \nповторите ввод')
-#             print()
-#
-#             flag = False
-#             out(names.transmission_type.keys())
-#             while (flag != True):
-#                 print('выберите вид кпп: ', end='')
-#                 s = input()
-#                 if s in names.transmission_type.keys():
-#                     ct = names.transmission_type[s]
-#                     flag = True
-#                 else:
-#                     print('данные введены некорректно, \nповторите ввод')
-#             print()
-#
-#             flag = False
-#             out(names.drive_type.keys())
-#             while (flag != True):
-#                 print('выберите вид привода: ', end='')
-#                 s = input()
-#                 if s in names.drive_type.keys():
-#                     cd = names.drive_type[s]
-#                     flag = True
-#                 else:
-#                     print('данные введены некорректно, \nповторите ввод')
-#             print()
-#
-#             flag = False
-#             while (flag != True):
-#                 print('введите пробег: ', end='')
-#                 cmi = int(input())
-#                 if (cmi >= 0):
-#                     flag = True
-#                 else:
-#                     print('данные введены некорректно, \nповторите ввод')
-#             print()
-#
-#             flag = False
-#             while (flag != True):
-#                 print('введите объем двигателя: ', end='')
-#                 cec = float(input())
-#                 if cec > 0 and cec < 8:
-#                     flag = True
-#                 else:
-#                     print('данные введены некорректно, \nповторите ввод')
-#             print()
-#
-#             flag = False
-#             while (flag != True):
-#                 print('введите количество лошадиных сил: ', end='')
-#                 chp = int(input())
-#                 if chp > 0 and chp < 2100:
-#                     flag = True
-#                 else:
-#                     print('данные введены некорректно, \nповторите ввод')
-#             print()
-#
-#             flag = False
-#             while (flag != True):
-#                 print('введите год производства автомобиля: ', end='')
-#                 ca = 2024 - int(input())
-#                 if ca >= 0 and ca < 140:
-#                     flag = True
-#                 else:
-#                     print('данные введены некорректно, \nповторите ввод')
-#             print()
-#
-#             # словарь для данных пользователя
-#             order_dict = {'car_brand': cb, 'car_model': cm, 'car_city': cci, 'car_fuel': cf,
-#                           'car_transmission': ct, 'car_drive': cd, 'car_mileage': cmi,
-#                           'car_engine_capacity': cec, 'car_engine_hp': chp, 'car_age': ca}
-#
-#             # проверка введённых данных
-#             print('Ваши данные:')
-#             for i in order_dict.values():
-#                 print(i, sep=', ', end=' ')
-#             print()
-#             print('Данные коректны: да/нет?')
-#             key = input()
-#             if (key == 'да'):
-#                 flag_glob = False
-#
-#         # переводим данные в dataframe
-#         order_data = pd.DataFrame(order_dict, index=[0])
-#
-#         # приводим строковые данные к численному формату (пользовательские)
-#         order_data['car_brand'] = brand_encoder.transform(order_data['car_brand'])
-#         order_data['car_model'] = model_encoder.transform(order_data['car_model'])
-#         order_data['car_city'] = city_encoder.transform(order_data['car_city'])
-#         order_data['car_fuel'] = fuel_encoder.transform(order_data['car_fuel'])
-#         order_data['car_transmission'] = transmission_encoder.transform(order_data['car_transmission'])
-#         order_data['car_drive'] = drive_encoder.transform(order_data['car_drive'])
-#
-#         # проводим нормализацию данных (пользовательских)
-#         order_data = scaler.transform(order_data)
-#
-#         # делаем прогноз
-#         order_prediction = regressor.predict(order_data)
-#         print('Оценочная стоимость автомобиля с введёнными параметрами: ', end='')
-#         print(int(round(*order_prediction * 0.78, -2)), '-', int(round(*order_prediction * 0.95, -2)), 'руб.')
-#     else:
-#         print("Завершение работы")
-#         break
