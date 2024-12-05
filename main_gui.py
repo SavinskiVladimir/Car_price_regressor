@@ -429,7 +429,6 @@ def parse_brand(event):
     output_text.insert(tk.END, "Выберите модель автомобиля. ")
     output_text.see(tk.END)
     output_text.configure(state='disabled')
-    print(type(names.models_by_brand[cb]))
     if not isinstance(names.models_by_brand[cb], str):
         combobox_models = ttk.Combobox(window, width=40, height=20, values=sorted(names.models_by_brand[cb]))
     else:
